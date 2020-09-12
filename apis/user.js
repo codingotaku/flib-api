@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 import { SECRET, getUserId } from '../utils/authentication.js';
+import fs from 'fs'
 
 export default class UserApis {
     constructor(conn) {
@@ -241,5 +242,44 @@ export default class UserApis {
             });
         }
 
+    }
+
+    async getProfilePicture(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        const id = userId.id;
+        const conn = this.conn;
+        let modSql = "SELECT profile_pic FROM flib_users where id=?";
+        conn.query(modSql, [id], function (modErr, result) {
+            if (modErr) throw modErr;
+            else {
+                res.contentType('image/jpeg');
+                res.send(result[0].profile_pic);
+            }
+        });
+    }
+    async setProfilePicture(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        const id = userId.id;
+        const file = req.file;
+        const conn = this.conn;
+        const temp_path = file.path;
+        let modSql = "UPDATE flib_users set profile_pic=? where id=?";
+        conn.query(modSql, [fs.readFileSync(temp_path), id], function (modErr, modResult) {
+            if (modErr) throw modErr;
+            else {
+                res.json({
+                    status: 200, error: null,
+                    response: "Profile picture is updated"
+                });
+            }
+        });
     }
 }

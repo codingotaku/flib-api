@@ -12,7 +12,7 @@ Backend for [flib-ui](https://github.com/codingotaku/flib-ui)
 - [x] update e-mail
 - [x] update password
 - [x] update display name
-- [ ] update profile picture
+- [x] update profile picture
 - [ ] update profile decription
 - [ ] add social links for profile
 - [ ] donation links 
