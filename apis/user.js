@@ -25,7 +25,6 @@ export default class UserApis {
                 const response = {
                     "status": 302
                 }
-                console.log(result);
                 if (result[0].uname === uname) {
                     response.error = "Username already exists!";
                 } else {
@@ -36,7 +35,6 @@ export default class UserApis {
             }
             // Hash the password
             bcrypt.hash(req.body.pass, 12).then(hashedPass => {
-                console.log(hashedPass);
                 let data = {
                     uname: uname,
                     email: email,
@@ -65,11 +63,10 @@ export default class UserApis {
                 return;
             }
             bcrypt.compare(req.body.pass, result[0].password).then(valid => {
-                console.log(valid);
                 if (!valid) {
                     res.json({ "status": 404, "error": "Incorrect password!", "token": null });
                 } else {
-                    const token = jwt.sign({ user: _.pick(result[0], ['id', 'email']) },
+                    const token = jwt.sign({ user: _.pick(result[0], ['id', 'uname']) },
                         SECRET, {
                         expiresIn: '1w'
                     });
@@ -88,17 +85,26 @@ export default class UserApis {
         });
     }
 
-    async deleteUser(req, res) {
-        const uname = req.body.uname;
+    async editUser(req, res) {
         const userId = await getUserId(req);
         if (userId == null || userId.message) {
             res.send({ status: 401, error: "login expired or not provided", response: null });
             return;
         }
+        const id = userId.id;
 
+    }
+
+    async deleteUser(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        const id = userId.id;
         const conn = this.conn;
-        let delSql = "DELETE FROM flib_users WHERE uname=?";
-        conn.query(delSql, [uname], function (delErr, delResult) {
+        let delSql = "DELETE FROM flib_users WHERE id=?";
+        conn.query(delSql, [id], function (delErr, delResult) {
             if (delErr) throw delErr;
             else {
                 res.json({
