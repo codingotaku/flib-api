@@ -11,7 +11,68 @@ export default class UserApis {
     }
 
     async register(req, res) {
-        console.log(this.conn);
-        res.send('Hello World');
+        const uname = req.body.uname;
+        const email = req.body.email;
+        let sql = "SELECT * from flib_users where email=? or uname=?";
+        const conn = this.conn;
+        conn.query(sql, [email, uname], function (err, result) {
+            if (err) throw err;
+            if (result.length > 0) {
+                const response = {
+                    "status": 302
+                }
+                console.log(result);
+                if (result[0].uname === uname) {
+                    response.error = "Username already exists!";
+                } else {
+                    response.error = "Email already exists!";
+                }
+                res.json(response);
+                return;
+            }
+            // Hash the password
+            bcrypt.hash(req.body.pass, 12).then(hashedPass => {
+                console.log(hashedPass);
+                let data = {
+                    uname: uname,
+                    email: email,
+                    password: hashedPass
+                };
+
+                let insSql = "INSERT into flib_users SET ?";
+                conn.query(insSql, data, function (err, result) {
+                    if (err) throw err;
+                    res.json({ "status": 200, "error": null, "response": result });
+                });
+            });
+
+        })
+    }
+
+    async login(req, res) {
+        const uname = req.body.uname;
+        // User can login with either username or email, doesn't matter witch
+        let sql = "SELECT * from flib_users where email=? or uname=?";
+        const conn = this.conn;
+        conn.query(sql, [uname, uname], function (err, result) {
+            if (err) throw err;
+            if (result.length === 0) {
+                res.json({ "status": 404, "error": "User does not exist!", "token": null });
+                return;
+            }
+            bcrypt.compare(req.body.pass, result[0].password).then(valid => {
+                console.log(valid);
+                if (!valid) {
+                    res.json({ "status": 404, "error": "Incorrect password!", "token": null });
+                } else {
+                    const token = jwt.sign({ user: _.pick(result[0], ['id', 'email']) },
+                        SECRET, {
+                        expiresIn: '1w'
+                    });
+                    res.json({ "status": 200, "error": null, "token": token });
+                }
+            })
+
+        });
     }
 }

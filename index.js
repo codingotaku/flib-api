@@ -19,10 +19,15 @@ const env = process.env.NODE_ENV || 'development';
 const config = allConfig[env];
 
 const con = mysql.createConnection(config.database);
+con.connect();
 const userApis = new UserApis(con);
-app.get('/', function (req, res) {
+app.post('/signup', function (req, res) {
     userApis.register(req, res)
-})
+});
+
+app.post('/login', function (req, res) {
+    userApis.login(req, res)
+});
 
 //Setting up server
 const server = app.listen(config.server.port, function () {
