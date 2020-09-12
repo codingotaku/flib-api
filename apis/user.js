@@ -3,7 +3,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
-const SECRET = 'ajdfadvasdy5788y9idyhbwwekdbsjjkahfbv';
+import { SECRET, getUserId } from '../utils/authentication.js';
 
 export default class UserApis {
     constructor(conn) {
@@ -75,7 +75,7 @@ export default class UserApis {
                     });
                     res.json({
                         status: 200, error: null,
-                        userDetails:{
+                        userDetails: {
                             uname: result[0].uname,
                             email: result[0].email,
                             name: result[0].name,
@@ -86,5 +86,27 @@ export default class UserApis {
             })
 
         });
+    }
+
+    async deleteUser(req, res) {
+        const uname = req.body.uname;
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+
+        const conn = this.conn;
+        let delSql = "DELETE FROM flib_users WHERE uname=?";
+        conn.query(delSql, [uname], function (delErr, delResult) {
+            if (delErr) throw delErr;
+            else {
+                res.json({
+                    status: 204, error: null,
+                    response: "User is deleted"
+                });
+            }
+        });
+
     }
 }

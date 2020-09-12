@@ -29,6 +29,10 @@ app.post('/login', function (req, res) {
     userApis.login(req, res)
 });
 
+app.post('/delete', function (req, res) {
+    userApis.deleteUser(req, res)
+});
+
 //Setting up server
 const server = app.listen(config.server.port, function () {
     const host = server.address().address;
