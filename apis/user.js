@@ -13,6 +13,10 @@ export default class UserApis {
     async register(req, res) {
         const uname = req.body.uname;
         const email = req.body.email;
+        if (!uname || !req.body.pass) {
+            res.json({ status: 404, error: "please enter both username and password" });
+            return;
+        }
         let sql = "SELECT * from flib_users where email=? or uname=?";
         const conn = this.conn;
         conn.query(sql, [email, uname], function (err, result) {
@@ -69,7 +73,15 @@ export default class UserApis {
                         SECRET, {
                         expiresIn: '1w'
                     });
-                    res.json({ "status": 200, "error": null, "token": token });
+                    res.json({
+                        status: 200, error: null,
+                        userDetails:{
+                            uname: result[0].uname,
+                            email: result[0].email,
+                            name: result[0].name,
+                            token: token
+                        }
+                    });
                 }
             })
 
