@@ -148,16 +148,15 @@ export default class UserApis {
             conn.query(sql, [id], function (err, result) {
                 if (err) throw err;
                 if (result.length === 0) {
-                    res.json({ "status": 404, "error": "User does not exist!"});
+                    res.json({ "status": 404, "error": "User does not exist!" });
                     return;
                 }
                 bcrypt.compare(req.body.pass, result[0].password).then(valid => {
                     if (!valid) {
-                        res.json({ "status": 404, "error": "Incorrect password!"});
+                        res.json({ "status": 404, "error": "Incorrect password!" });
                     } else {
                         // Hash the new password
                         bcrypt.hash(req.body.pass, 12).then(hashedPass => {
-                            const conn = this.conn;
                             let modSql = "UPDATE flib_users set pass=? where id=?";
                             conn.query(modSql, [hashedPass, id], function (modErr, modResult) {
                                 if (modErr) throw modErr;
@@ -208,17 +207,39 @@ export default class UserApis {
             return;
         }
         const id = userId.id;
-        const conn = this.conn;
-        let delSql = "DELETE FROM flib_users WHERE id=?";
-        conn.query(delSql, [id], function (delErr, delResult) {
-            if (delErr) throw delErr;
-            else {
-                res.json({
-                    status: 204, error: null,
-                    response: "User is deleted"
-                });
-            }
-        });
+        const pass = req.body.pass;
+        if (pass) {
+            let sql = "SELECT * from flib_users where id=?";
+            const conn = this.conn;
+            conn.query(sql, [id], function (err, result) {
+                if (err) throw err;
+                if (result.length === 0) {
+                    res.json({ "status": 404, "error": "User does not exist!" });
+                    return;
+                }
+                bcrypt.compare(req.body.pass, result[0].password).then(valid => {
+                    if (!valid) {
+                        res.json({ "status": 404, "error": "Incorrect password!" });
+                    } else {
+                        let delSql = "DELETE FROM flib_users WHERE id=?";
+                        conn.query(delSql, [id], function (delErr, delResult) {
+                            if (delErr) throw delErr;
+                            else {
+                                res.json({
+                                    status: 204, error: null,
+                                    response: "User is deleted"
+                                });
+                            }
+                        });
+                    }
+                })
+            });
+        } else {
+            res.json({
+                status: 400, error: "password cannot be empty!",
+                response: null
+            });
+        }
 
     }
 }
