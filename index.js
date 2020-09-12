@@ -33,6 +33,20 @@ app.post('/delete', function (req, res) {
     userApis.deleteUser(req, res)
 });
 
+app.post('/update-username', function (req, res) {
+    userApis.updateUserName(req, res)
+});
+app.post('/update-user-email', function (req, res) {
+    userApis.updateUserEmail(req, res)
+});
+app.post('/update-user-password', function (req, res) {
+    userApis.updateUserPassword(req, res)
+});
+app.post('/update-user-display-name', function (req, res) {
+    userApis.updateUserDisplayName(req, res)
+});
+
+
 //Setting up server
 const server = app.listen(config.server.port, function () {
     const host = server.address().address;

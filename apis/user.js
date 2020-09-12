@@ -85,14 +85,120 @@ export default class UserApis {
         });
     }
 
-    async editUser(req, res) {
+    async updateUserName(req, res) {
         const userId = await getUserId(req);
         if (userId == null || userId.message) {
             res.send({ status: 401, error: "login expired or not provided", response: null });
             return;
         }
         const id = userId.id;
+        const uname = req.body.uname;
+        if (uname) {
+            const conn = this.conn;
+            let modSql = "UPDATE flib_users set uname=? where id=?";
+            conn.query(modSql, [uname, id], function (modErr, modResult) {
+                if (modErr) throw modErr;
+                else {
+                    res.json({
+                        status: 200, error: null,
+                        response: "User name is updated"
+                    });
+                }
+            });
+        } else {
+            res.json({
+                status: 400, error: "username cannot be empty",
+                response: null
+            });
+        }
+    }
 
+    async updateUserEmail(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        const id = userId.id;
+        const email = req.body.email;
+        const conn = this.conn;
+        let modSql = "UPDATE flib_users set email=? where id=?";
+        conn.query(modSql, [email, id], function (modErr, modResult) {
+            if (modErr) throw modErr;
+            else {
+                res.json({
+                    status: 200, error: null,
+                    response: "email is updated"
+                });
+            }
+        });
+    }
+
+    async updateUserPassword(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        const id = userId.id;
+        const pass = req.body.pass;
+        if (pass) {
+            let sql = "SELECT * from flib_users where id=?";
+            const conn = this.conn;
+            conn.query(sql, [id], function (err, result) {
+                if (err) throw err;
+                if (result.length === 0) {
+                    res.json({ "status": 404, "error": "User does not exist!"});
+                    return;
+                }
+                bcrypt.compare(req.body.pass, result[0].password).then(valid => {
+                    if (!valid) {
+                        res.json({ "status": 404, "error": "Incorrect password!"});
+                    } else {
+                        // Hash the new password
+                        bcrypt.hash(req.body.pass, 12).then(hashedPass => {
+                            const conn = this.conn;
+                            let modSql = "UPDATE flib_users set pass=? where id=?";
+                            conn.query(modSql, [hashedPass, id], function (modErr, modResult) {
+                                if (modErr) throw modErr;
+                                else {
+                                    res.json({
+                                        status: 200, error: null,
+                                        response: "password is updated"
+                                    });
+                                }
+                            });
+                        });
+                    }
+                })
+            });
+        } else {
+            res.json({
+                status: 400, error: "password cannot be empty!",
+                response: null
+            });
+        }
+    }
+
+    async updateUserDisplayName(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        const id = userId.id;
+        const name = req.body.name;
+        const conn = this.conn;
+        let modSql = "UPDATE flib_users set name=? where id=?";
+        conn.query(modSql, [name, id], function (modErr, modResult) {
+            if (modErr) throw modErr;
+            else {
+                res.json({
+                    status: 200, error: null,
+                    response: "Name is updated"
+                });
+            }
+        });
     }
 
     async deleteUser(req, res) {
