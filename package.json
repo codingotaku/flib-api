@@ -1,0 +1,37 @@
+{
+  "name": "flib-api",
+  "version": "1.0.0",
+  "description": "Backend for flib-ui",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "webpack — entry ./app/public/js/index.js — output-filename bundle.min.js — output-path ./app/public/js",
+    "start": "npx nodemon — exec babel-node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/codingotaku/flib-api.git"
+  },
+  "keywords": [
+    "flib",
+    "api",
+    "nodejs",
+    "express",
+    "free-books"
+  ],
+  "author": "Coding Otaku",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/codingotaku/flib-api/issues"
+  },
+  "homepage": "https://github.com/codingotaku/flib-api#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.20",
+    "mysql": "^2.18.1"
+  }
+}
