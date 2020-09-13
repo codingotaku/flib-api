@@ -10,13 +10,19 @@ const app = express();
 
 // APIs
 import UserApis from './apis/user.js'
+import BookApis from './apis/book.js';
 
 
+const upload = multer({ dest: __dirname + '/public/uploads/' });
+const type = upload.single('picture');
 
 // Body Parser Middleware
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.static('public'))
+app.use(upload.any()); 
+app.use(bodyParser.urlencoded({ extended: true })); 
+//form-urlencoded
 
 const env = process.env.NODE_ENV || 'development';
 const config = allConfig[env];
@@ -24,6 +30,9 @@ const config = allConfig[env];
 const con = mysql.createConnection(config.database);
 con.connect();
 const userApis = new UserApis(con);
+const bookApis = new BookApis(con);
+
+// User APIs
 app.post('/signup', function (req, res) {
     userApis.register(req, res)
 });
@@ -66,8 +75,11 @@ app.get('/user-profile-picture', function (req, res) {
     userApis.getProfilePicture(req, res)
 });
 
-const upload = multer({ dest: __dirname + '/public/uploads/' });
-const type = upload.single('picture');
+// Book APIs
+app.post('/create-book', function (req, res) {
+    bookApis.createBook(req, res)
+});
+
 app.post('/set-user-profile-picture', type, function (req, res) {
     userApis.setProfilePicture(req, res)
 });

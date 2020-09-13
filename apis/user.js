@@ -1,5 +1,3 @@
-// https://medium.com/nonstopio/pagination-authentication-and-authorization-in-nodejs-with-mysql-b65bc80a83be
-
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
