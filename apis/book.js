@@ -98,7 +98,7 @@ export default class BookApis {
     }
 
     //For demo, will remove later
-    async getAllPages(req) {
+    async getAllPages(req, res) {
         const userId = await getUserId(req);
         const bookId = req.query.id;
         const conn = this.conn;
