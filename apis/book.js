@@ -31,7 +31,7 @@ export default class BookApis {
         if (req.files) {
             const file = req.files[0];
             const temp_path = file.path;
-            const targetPath = path.join(__dirname, `./public/books/${id}-${req.body.title}-cover${path.extname(file.originalname)}`);
+            const targetPath = path.join(__dirname, `./public/public/${id}-${req.body.title}-cover${path.extname(file.originalname)}`);
             data.cover = `${id}-${req.body.title}-cover${path.extname(file.originalname)}`;
             fs.rename(temp_path, targetPath, err => {
                 if (err) {
@@ -42,6 +42,7 @@ export default class BookApis {
                 }
             });
         }
+        
 
         const conn = this.conn;
         console.log(req.body);
