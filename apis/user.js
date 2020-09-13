@@ -330,11 +330,11 @@ export default class UserApis {
             return;
         }
         const id = userId.id;
-        const file = req.file;
+        const file = req.files[0];
         const conn = this.conn;
         const temp_path = file.path;
         let modSql = "UPDATE flib_users set profile_pic=? where id=?";
-        const targetPath = path.join(__dirname, `./public/uploads/${id}-profile${path.extname(req.file.originalname)}`);
+        const targetPath = path.join(__dirname, `./public/uploads/${id}-profile${path.extname(file.originalname)}`);
         fs.rename(temp_path, targetPath, err => {
             if (err) {
                 res.json({
@@ -342,7 +342,7 @@ export default class UserApis {
                     response: err.message
                 });
             }
-            conn.query(modSql, [`${id}-profile${path.extname(req.file.originalname)}`, id], function (modErr, modResult) {
+            conn.query(modSql, [`${id}-profile${path.extname(file.originalname)}`, id], function (modErr, modResult) {
                 if (modErr) throw modErr;
                 else {
                     res.json({
