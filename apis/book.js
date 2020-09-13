@@ -69,6 +69,62 @@ export default class BookApis {
         });
     }
 
+
+    //For demo, will remove later
+    async getAllBooks(req, res) {
+        const userId = await getUserId(req);
+        const bookId = req.query.id;
+        const conn = this.conn;
+
+
+        let selSql = "SELECT `flib_users`.`uname`, `flib_books`.`title`, `flib_books`.`id` as book_id, `flib_books`.description, `flib_books`.`tags`, count(`flib_pages`.`id`) AS chapters FROM `flib_books` JOIN `flib_users` ON `flib_books`.`user` = `flib_users`.`id` JOIN `flib_pages` ON `flib_pages`.`book` = `flib_books`.`id` GROUP BY `flib_books`.`id`";
+        conn.query(selSql, function (modErr, result) {
+            if (modErr) throw modErr;
+            else {
+                if (result[0]) {
+                    res.json({
+                        status: 200, error: null,
+                        response: result
+                    });
+                }
+                else {
+                    res.json({
+                        status: 200, error: "Nothing here",
+                        response: null
+                    });
+                }
+            }
+        });
+    }
+
+    //For demo, will remove later
+    async getAllPages(req) {
+        const userId = await getUserId(req);
+        const bookId = req.query.id;
+        const conn = this.conn;
+
+
+        let selSql = "SELECT * FROM flib_pages where book=?";
+        conn.query(selSql, [bookId], function (modErr, result) {
+            if (modErr) throw modErr;
+            else {
+                if (result[0]) {
+                    res.json({
+                        status: 200, error: null,
+                        response: result
+                    });
+                }
+                else {
+                    res.json({
+                        status: 200, error: "Nothing here",
+                        response: null
+                    });
+                }
+            }
+        });
+    }
+
+
     async getBookById(req, res) {
         const userId = await getUserId(req);
         if (!req.query.id) {
@@ -106,7 +162,7 @@ export default class BookApis {
             res.send({ status: 401, error: "login expired or not provided", response: null });
             return;
         }
-        if (!req.body.id,!req.body.title) {
+        if (!req.body.id, !req.body.title) {
             res.send({ status: 401, error: "Please provide the book title and book id", response: null });
             return;
         }

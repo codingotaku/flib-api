@@ -75,6 +75,14 @@ app.get('/user-profile-picture', function (req, res) {
     userApis.getProfilePicture(req, res)
 });
 
+app.get('/books', function (req, res) {
+    bookApis.getAllBooks(req, res)
+});
+
+app.get('/pages', function (req, res) {
+    bookApis.getAllPages(req, res)
+});
+
 app.get('/book-by-id', function (req, res) {
     bookApis.getBookById(req, res)
 });
