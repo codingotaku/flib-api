@@ -45,10 +45,18 @@ app.post('/update-user-email', function (req, res) {
 app.post('/update-user-password', function (req, res) {
     userApis.updateUserPassword(req, res)
 });
+
 app.post('/update-user-display-name', function (req, res) {
     userApis.updateUserDisplayName(req, res);
 });
 
+app.post('/set-social-links', function (req, res) {
+    userApis.setSocialLinks(req, res);
+});
+
+app.get('/social-links', function (req, res) {
+    userApis.getSocialLinks(req, res);
+});
 const upload = multer({ dest: __dirname + '/public/uploads/' });
 const type = upload.single('picture');
 app.get('/user-profile-picture', function (req, res) {

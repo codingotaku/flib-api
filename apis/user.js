@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 import { SECRET, getUserId } from '../utils/authentication.js';
 import fs from 'fs'
+import path from 'path';
+const __dirname = path.resolve();
 
 export default class UserApis {
     constructor(conn) {
@@ -143,6 +145,7 @@ export default class UserApis {
         }
         const id = userId.id;
         const pass = req.body.pass;
+        const newPass = req.body.newPass;
         if (pass) {
             let sql = "SELECT * from flib_users where id=?";
             const conn = this.conn;
@@ -157,8 +160,8 @@ export default class UserApis {
                         res.json({ "status": 404, "error": "Incorrect password!" });
                     } else {
                         // Hash the new password
-                        bcrypt.hash(req.body.pass, 12).then(hashedPass => {
-                            let modSql = "UPDATE flib_users set pass=? where id=?";
+                        bcrypt.hash(req.body.newPass, 12).then(hashedPass => {
+                            let modSql = "UPDATE flib_users set password=? where id=?";
                             conn.query(modSql, [hashedPass, id], function (modErr, modResult) {
                                 if (modErr) throw modErr;
                                 else {
@@ -256,8 +259,7 @@ export default class UserApis {
         conn.query(modSql, [id], function (modErr, result) {
             if (modErr) throw modErr;
             else {
-                res.contentType('image/jpeg');
-                res.send(result[0].profile_pic);
+                res.sendFile(path.join(__dirname,'public/uploads/',result[0].profile_pic));
             }
         });
     }
@@ -272,12 +274,79 @@ export default class UserApis {
         const conn = this.conn;
         const temp_path = file.path;
         let modSql = "UPDATE flib_users set profile_pic=? where id=?";
-        conn.query(modSql, [fs.readFileSync(temp_path), id], function (modErr, modResult) {
+        const targetPath = path.join(__dirname, `./public/uploads/${id}-profile${path.extname(req.file.originalname)}`);
+        fs.rename(temp_path, targetPath, err => {
+            if (err) {
+                res.json({
+                    status: 200, error: null,
+                    response: err.message
+                });
+            }
+            conn.query(modSql, [`${id}-profile${path.extname(req.file.originalname)}`, id], function (modErr, modResult) {
+                if (modErr) throw modErr;
+                else {
+                    res.json({
+                        status: 200, error: null,
+                        response: "Profile picture is updated"
+                    });
+                }
+            });
+        });
+
+    }
+    async setSocialLinks(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        const id = userId.id;
+        const links = req.body.links;
+        const pairs = { links: [] };
+
+        for (let link of links) {
+            console.log(link);
+            if (link.title && link.href) {
+                console.log(link);
+                pairs.links.push({ title: link.title, href: link.href })
+            }
+        }
+        if (pairs.links.length > 0) {
+            const conn = this.conn;
+            let modSql = "UPDATE flib_users set links=? where id=?";
+            conn.query(modSql, [JSON.stringify(pairs), id], function (modErr, modResult) {
+                if (modErr) throw modErr;
+                else {
+                    res.json({
+                        status: 200, error: null,
+                        response: "Links are updated"
+                    });
+                }
+            });
+        } else {
+            res.json({
+                status: 400, error: null,
+                response: "Links cannot be empty"
+            });
+        }
+
+    }
+
+    async getSocialLinks(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        const id = userId.id;
+        const conn = this.conn;
+        let modSql = "SELECT links FROM flib_users where id=?";
+        conn.query(modSql, [id], function (modErr, result) {
             if (modErr) throw modErr;
             else {
                 res.json({
                     status: 200, error: null,
-                    response: "Profile picture is updated"
+                    response: JSON.parse(result[0].links)
                 });
             }
         });
