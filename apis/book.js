@@ -168,7 +168,7 @@ export default class BookApis {
         }
         const id = userId.id;
         const data = {
-            book: id,
+            book: req.body.id,
             title: req.body.title,
             content: req.body.content,
             published: req.body.published,
