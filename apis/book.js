@@ -10,6 +10,7 @@ export default class BookApis {
     constructor(conn) {
         this.conn = conn;
     }
+
     async createBook(req, res) {
         const userId = await getUserId(req);
         if (userId == null || userId.message) {
@@ -28,10 +29,10 @@ export default class BookApis {
             license: req.body.license,
             anonymous: req.body.anonymous,
         }
-        if (req.files) {
+        if (req.files.length) {
             const file = req.files[0];
             const temp_path = file.path;
-            const targetPath = path.join(__dirname, `./public/public/${id}-${req.body.title}-cover${path.extname(file.originalname)}`);
+            const targetPath = path.join(__dirname, `./public/uploads/${id}-${req.body.title}-cover${path.extname(file.originalname)}`);
             data.cover = `${id}-${req.body.title}-cover${path.extname(file.originalname)}`;
             fs.rename(temp_path, targetPath, err => {
                 if (err) {
@@ -42,7 +43,7 @@ export default class BookApis {
                 }
             });
         }
-        
+
 
         const conn = this.conn;
         console.log(req.body);
@@ -57,17 +58,134 @@ export default class BookApis {
         }
 
         let insSql = "INSERT INTO flib_books SET ?";
-        conn.query(insSql, data, function (modErr, modResult) {
+        conn.query(insSql, data, function (modErr, result) {
             if (modErr) throw modErr;
             else {
                 res.json({
                     status: 200, error: null,
-                    response: "Created Book"
+                    response: result
                 });
             }
         });
     }
 
+    async getBookById(req, res) {
+        const userId = await getUserId(req);
+        if (!req.query.id) {
+            res.send({ status: 401, error: "Please provide the book id", response: null });
+            return;
+        }
+        const id = userId.id;
+        const bookId = req.query.id;
+        const conn = this.conn;
+
+
+        let selSql = "SELECT * FROM flib_books where id=?";
+        conn.query(selSql, [bookId], function (modErr, result) {
+            if (modErr) throw modErr;
+            else {
+                if (result[0]) {
+                    res.json({
+                        status: 200, error: null,
+                        response: result[0]
+                    });
+                }
+                else {
+                    res.json({
+                        status: 200, error: "Nothing here",
+                        response: null
+                    });
+                }
+            }
+        });
+    }
+
+    async createPage(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        if (!req.body.id,!req.body.title) {
+            res.send({ status: 401, error: "Please provide the book title and book id", response: null });
+            return;
+        }
+        const id = userId.id;
+        const data = {
+            book: id,
+            title: req.body.title,
+            content: req.body.content,
+            published: req.body.published,
+        }
+
+        const conn = this.conn;
+        let insSql = "INSERT INTO flib_pages SET ?";
+        conn.query(insSql, data, function (modErr, result) {
+            if (modErr) throw modErr;
+            else {
+                res.json({
+                    status: 200, error: null,
+                    response: result
+                });
+            }
+        });
+    }
+
+    async getPageById(req, res) {
+        const userId = await getUserId(req);
+        if (!req.query.id) {
+            res.send({ status: 401, error: "Please provide the book id", response: null });
+            return;
+        }
+        const id = userId.id;
+        const bookId = req.query.id;
+        const conn = this.conn;
+
+
+        let selSql = "SELECT * FROM flib_pages where id=?";
+        conn.query(selSql, [bookId], function (modErr, result) {
+            if (modErr) throw modErr;
+            else {
+                if (result[0]) {
+                    res.json({
+                        status: 200, error: null,
+                        response: result[0]
+                    });
+                }
+                else {
+                    res.json({
+                        status: 200, error: "Nothing here",
+                        response: null
+                    });
+                }
+            }
+        });
+    }
+    async getBookCoverById(req, res) {
+        const userId = await getUserId(req);
+        console.log(req);
+        if (!req.params.id) {
+            res.send({ status: 401, error: "Please provide the book id", response: null });
+            return;
+        }
+        const id = userId.id;
+        const bookId = req.body.id;
+        const conn = this.conn;
+
+
+        let selSql = "SELECT * FROM flib_books where id=?";
+        conn.query(selSql, [bookId], function (modErr, result) {
+            if (modErr) throw modErr;
+            else {
+
+                if (result[0].cover) {
+                    res.sendFile(path.join(__dirname, 'public/uploads/', result[0].cover));
+                } else {
+                    res.sendFile(path.join(__dirname, 'public/default_pp.svg'));
+                }
+            }
+        });
+    }
     async setBookCover(req, res) {
         const userId = await getUserId(req);
         if (userId == null || userId.message) {
@@ -80,7 +198,7 @@ export default class BookApis {
         const conn = this.conn;
         const temp_path = file.path;
         let modSql = "UPDATE flib_books set cover=? where id=?";
-        const targetPath = path.join(__dirname, `./public/books/${bookId}-cover${path.extname(req.file.originalname)}`);
+        const targetPath = path.join(__dirname, `./public/uploads/${bookId}-cover${path.extname(req.file.originalname)}`);
         fs.rename(temp_path, targetPath, err => {
             if (err) {
                 res.json({

@@ -75,9 +75,22 @@ app.get('/user-profile-picture', function (req, res) {
     userApis.getProfilePicture(req, res)
 });
 
+app.get('/book-by-id', function (req, res) {
+    bookApis.getBookById(req, res)
+});
+
+app.get('/book-cover-by-id', function (req, res) {
+    bookApis.getBookCoverById(req, res)
+});
+
 // Book APIs
 app.post('/create-book', function (req, res) {
     bookApis.createBook(req, res)
+});
+
+
+app.post('/create-page', function (req, res) {
+    bookApis.createPage(req, res)
 });
 
 app.post('/set-user-profile-picture', type, function (req, res) {
