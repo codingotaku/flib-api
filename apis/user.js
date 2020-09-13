@@ -259,7 +259,11 @@ export default class UserApis {
         conn.query(modSql, [id], function (modErr, result) {
             if (modErr) throw modErr;
             else {
-                res.sendFile(path.join(__dirname,'public/uploads/',result[0].profile_pic));
+                if (result[0].profile_pic) {
+                    res.sendFile(path.join(__dirname, 'public/uploads/', result[0].profile_pic));
+                }else {
+                    res.sendFile(path.join(__dirname, 'public/default_pp.svg'));
+                }
             }
         });
     }

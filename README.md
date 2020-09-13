@@ -14,8 +14,8 @@ Backend for [flib-ui](https://github.com/codingotaku/flib-ui)
 - [x] update display name
 - [x] update profile picture
 - [ ] update profile decription
-- [ ] add social links for profile
-- [ ] donation links 
+- [x] add social links for profile
+- [ ] ~~donation links~~
 - [ ] Subscribtion
 
 - [ ] Get Book 
