@@ -2,6 +2,20 @@
 
 Backend for [flib-ui](https://github.com/codingotaku/flib-ui)
 
+#### Requirements
+- MySQL
+- Node.Js
+
+#### SCHEMA:
+Initial version of schema is available at `db/fib_db.sql`
+
+## How use?
+Create database with the schema provided. 
+
+provide database config details using `config.backup.js`, rename it to `config.js`
+
+
+
 ### TODO
 
 #### Account APIs
@@ -13,26 +27,26 @@ Backend for [flib-ui](https://github.com/codingotaku/flib-ui)
 - [x] update password
 - [x] update display name
 - [x] update profile picture
-- [ ] update profile decription
+- [x] update profile decription
 - [x] add social links for profile
 - [ ] ~~donation links~~
 - [ ] Subscribtion
 
-- [ ] Get Book 
+- [x] Get Book 
 
 #### Book APIs
-- [ ] Create Book
+- [x] Create Book
 - [ ] Update Title
 - [ ] Update Licence
 - [ ] Update Description
-- [ ] Update Cover Image
+- [x] Update Cover Image
 - [ ] Update tags
 
 
 - [ ] Get Book 
 
-- [ ] Create Chapter
+- [x] Create Chapter
 - [ ] Update content
 - [ ] Update Chapter name
 
-- [ ] Get Page(s)
+- [x] Get Page(s)
