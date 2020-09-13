@@ -88,6 +88,64 @@ export default class UserApis {
         });
     }
 
+    async updateProfile(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        if (!req.body.name && !req.body.profileDesc && !req.body.links) {
+            res.send({ status: 401, error: "Please profile name, bio or links", response: null });
+            return;
+        }
+        const id = userId.id;
+        const name = req.body.name;
+        const profile_desc = req.body.profileDesc;
+        const links = req.body.links;
+        const conn = this.conn;
+        console.log(req.body);
+        const pairs = { links: [] };
+        for (let link of links) {
+            console.log(link);
+            if (link.title && link.href) {
+                console.log(link);
+                pairs.links.push({ title: link.title, href: link.href })
+            }
+        }
+
+        let modSql = "UPDATE flib_users set name=?, profile_desc=?, links=? where id=?";
+        conn.query(modSql, [name, profile_desc, JSON.stringify(pairs), id], function (modErr, modResult) {
+            if (modErr) throw modErr;
+            else {
+                res.json({
+                    status: 200, error: null,
+                    response: "Updated profile"
+                });
+            }
+        });
+    }
+    async getProfile(req, res) {
+        const userId = await getUserId(req);
+        if (userId == null || userId.message) {
+            res.send({ status: 401, error: "login expired or not provided", response: null });
+            return;
+        }
+        const id = userId.id;
+        const conn = this.conn;
+        let modSql = "SELECT name, profile_desc, links FROM flib_users where id=?";
+        conn.query(modSql, [id], function (modErr, result) {
+            if (modErr) throw modErr;
+            else {
+                if (!result[0].links) {
+                    result[0].links = [];
+                } else {
+                    result[0].links = JSON.parse(result[0].links).links;
+                }
+                res.json(result[0]);
+            }
+        });
+    }
+
     async updateUserName(req, res) {
         const userId = await getUserId(req);
         if (userId == null || userId.message) {
@@ -261,7 +319,7 @@ export default class UserApis {
             else {
                 if (result[0].profile_pic) {
                     res.sendFile(path.join(__dirname, 'public/uploads/', result[0].profile_pic));
-                }else {
+                } else {
                     res.sendFile(path.join(__dirname, 'public/default_pp.svg'));
                 }
             }
@@ -355,4 +413,5 @@ export default class UserApis {
             }
         });
     }
+
 }

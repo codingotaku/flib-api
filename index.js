@@ -35,7 +35,12 @@ app.post('/login', function (req, res) {
 app.post('/delete', function (req, res) {
     userApis.deleteUser(req, res)
 });
-
+app.post('/set-user-profile', function (req, res) {
+    userApis.updateProfile(req, res)
+});
+app.get('/user-profile', function (req, res) {
+  userApis.getProfile(req, res)
+});
 app.post('/update-username', function (req, res) {
     userApis.updateUserName(req, res)
 });
@@ -57,11 +62,12 @@ app.post('/set-social-links', function (req, res) {
 app.get('/social-links', function (req, res) {
     userApis.getSocialLinks(req, res);
 });
-const upload = multer({ dest: __dirname + '/public/uploads/' });
-const type = upload.single('picture');
 app.get('/user-profile-picture', function (req, res) {
     userApis.getProfilePicture(req, res)
 });
+
+const upload = multer({ dest: __dirname + '/public/uploads/' });
+const type = upload.single('picture');
 app.post('/set-user-profile-picture', type, function (req, res) {
     userApis.setProfilePicture(req, res)
 });
